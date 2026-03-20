@@ -1,6 +1,5 @@
 pandas
-requests
-nltk
 python-dotenv
 google-genai
 huggingface_hub
+nltk
