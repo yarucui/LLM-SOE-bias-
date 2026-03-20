@@ -1,0 +1,5 @@
+{
+  "name": "LLM Socioeconomic Bias Research Tool",
+  "description": "A research platform to evaluate LLM decision-making bias across different socioeconomic personas using heuristic and AI-judge indices.",
+  "requestFramePermissions": []
+}
