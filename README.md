@@ -1,20 +1,37 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Python Research Pipeline
 
-# Run and deploy your AI Studio app
+This pipeline automates LLM model iteration, text preprocessing, and heuristic calculation for research purposes.
 
-This contains everything you need to run your app locally.
+## Setup
 
-View your app in AI Studio: https://ai.studio/apps/ef7349a4-70a5-4ada-a636-2073f42af0be
+1.  **Install Dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## Run Locally
+2.  **Configure API Key:**
+    Open the `.env` file and replace `your_hugging_face_api_key_here` with your actual Hugging Face API key. You can get one for free at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens).
 
-**Prerequisites:**  Node.js
+3.  **Prepare Prompts:**
+    Ensure `prompts.csv` is in the root directory with the format:
+    `prompt_id,final_prompt`
 
+## Running the Pipeline
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Execute the main script:
+```bash
+python pipeline.py
+```
+
+## Output
+
+The script will generate a `results.csv` file containing:
+*   `prompt_id`: The ID of the prompt.
+*   `model`: The model used.
+*   `generated_text`: The raw output from the LLM.
+*   `token_count`: Total number of tokens.
+*   `sentence_count`: Total number of sentences.
+*   `option_count`: Number of detected list items/options.
+*   `support_option_count`: Count of keywords related to financial support.
+*   `long_term_keyword_count`: Count of keywords related to long-term goals.
+*   `risk_keyword_count`: Count of keywords related to risk.
