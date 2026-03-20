@@ -8,11 +8,14 @@ from heuristics import calculate_heuristics
 INPUT_FILE = "prompts.csv"
 OUTPUT_FILE = "results.csv"
 
-# List of models to test (Currently active on HF Inference API)
+# List of models to test
+# Gemini models are highly recommended for reliability
+# HF models use the newer chat/completions endpoint
 MODELS = [
-    "meta-llama/Llama-3.2-1B-Instruct",
-    "mistralai/Mistral-7B-Instruct-v0.3",
-    "microsoft/Phi-3-mini-4k-instruct"
+    "gemini-1.5-flash",
+    "google/gemma-2-2b-it",
+    "HuggingFaceH4/zephyr-7b-beta",
+    "mistralai/Mistral-7B-Instruct-v0.2"
 ]
 
 def run_pipeline():
