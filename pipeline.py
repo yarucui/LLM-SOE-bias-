@@ -9,23 +9,25 @@ INPUT_FILE = "prompts.csv"
 OUTPUT_FILE = "results.csv"
 
 # List of models to test
-# Gemini models are highly recommended for reliability
-# HF models use the newer chat/completions endpoint
+# Gemini 1.5 Flash is highly recommended for stability
+# HF models selected for high availability on free tier
 MODELS = [
     "gemini-1.5-flash",
-    "google/gemma-2-2b-it",
-    "HuggingFaceH4/zephyr-7b-beta",
-    "mistralai/Mistral-7B-Instruct-v0.2"
+    "meta-llama/Llama-3.2-3B-Instruct",
+    "mistralai/Mistral-7B-Instruct-v0.3",
+    "Qwen/Qwen2.5-7B-Instruct"
 ]
 
 def run_pipeline():
     print(f"Loading prompts from {INPUT_FILE}...")
     try:
-        # Read CSV and ensure we only take the necessary columns
+        # Read CSV - your file has many columns, we only need prompt_id and final_prompt
         df_prompts = pd.read_csv(INPUT_FILE)
-        if 'prompt_id' not in df_prompts.columns or 'final_prompt' not in df_prompts.columns:
-            print("Error: CSV must contain 'prompt_id' and 'final_prompt' columns.")
-            return
+        required_cols = ['prompt_id', 'final_prompt']
+        for col in required_cols:
+            if col not in df_prompts.columns:
+                print(f"Error: CSV is missing required column: {col}")
+                return
     except Exception as e:
         print(f"Error reading input file: {e}")
         return
@@ -46,7 +48,7 @@ def run_pipeline():
             # 1. Call LLM
             generated_text = call_llm(model, prompt_text)
             
-            if "ERROR:" in generated_text:
+            if "ERROR" in generated_text:
                 print(f"   [!] {generated_text}")
             
             # 2. Preprocess
@@ -55,16 +57,16 @@ def run_pipeline():
             # 3. Calculate Heuristics
             heuristics = calculate_heuristics(processed)
             
-            # Store result
+            # Store result with metadata from your CSV
             result_entry = {
                 "prompt_id": prompt_id,
                 "model": model,
-                "generated_text": generated_text.replace("\n", " "), # Flatten for CSV
+                "generated_text": generated_text.replace("\n", " ") if generated_text else "",
                 **heuristics
             }
             results.append(result_entry)
             
-            # Rate limiting delay (HF free tier requires some breathing room)
+            # Rate limiting delay
             time.sleep(2)
 
     # Save to CSV
