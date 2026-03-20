@@ -9,13 +9,13 @@ INPUT_FILE = "prompts.csv"
 OUTPUT_FILE = "results.csv"
 
 # List of models to test
-# Gemini 1.5 Flash is highly recommended for stability
-# HF models selected for high availability on free tier
+# Gemini 1.5 Flash is the most stable free-tier model
+# HF models selected for high availability and compatibility with Inference API
 MODELS = [
     "gemini-1.5-flash",
-    "meta-llama/Llama-3.2-3B-Instruct",
-    "mistralai/Mistral-7B-Instruct-v0.3",
-    "Qwen/Qwen2.5-7B-Instruct"
+    "Qwen/Qwen2.5-7B-Instruct",
+    "HuggingFaceH4/zephyr-7b-beta",
+    "mistralai/Mistral-7B-Instruct-v0.2"
 ]
 
 def run_pipeline():

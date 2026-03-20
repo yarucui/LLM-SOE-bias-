@@ -22,9 +22,10 @@ def call_gemini(model_id, prompt):
     if not gemini_client:
         return "ERROR Gemini: API Key not configured."
     try:
-        # Using the standard model name format
+        # Ensure we use the correct model name format
+        clean_model_id = model_id.replace("models/", "")
         response = gemini_client.models.generate_content(
-            model=model_id,
+            model=clean_model_id,
             contents=prompt
         )
         return response.text
@@ -36,7 +37,7 @@ def call_huggingface(model_id, prompt):
     if not hf_client:
         return "ERROR HF: API Key not configured."
     try:
-        # Using chat completion for better instruction following
+        # Try chat completion first (better for Instruct models)
         response = hf_client.chat_completion(
             model=model_id,
             messages=[{"role": "user", "content": prompt}],
@@ -44,7 +45,16 @@ def call_huggingface(model_id, prompt):
         )
         return response.choices[0].message.content
     except Exception as e:
-        return f"ERROR HF: {str(e)}"
+        # Fallback to standard text generation if chat_completion is not supported
+        try:
+            response = hf_client.text_generation(
+                model=model_id,
+                prompt=f"User: {prompt}\nAssistant:",
+                max_new_tokens=500
+            )
+            return response
+        except Exception as e2:
+            return f"ERROR HF: {str(e)}"
 
 def call_llm(model_id, prompt):
     """Unified caller for Gemini and Hugging Face."""
