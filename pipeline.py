@@ -8,17 +8,21 @@ from heuristics import calculate_heuristics
 INPUT_FILE = "prompts.csv"
 OUTPUT_FILE = "results.csv"
 
-# List of models to test (Hugging Face IDs)
+# List of models to test (Currently active on HF Inference API)
 MODELS = [
-    "meta-llama/Llama-2-7b-chat-hf",
-    "mistralai/Mistral-7B-v0.1",
-    "tiiuae/falcon-7b-instruct"
+    "meta-llama/Llama-3.2-1B-Instruct",
+    "mistralai/Mistral-7B-Instruct-v0.3",
+    "microsoft/Phi-3-mini-4k-instruct"
 ]
 
 def run_pipeline():
     print(f"Loading prompts from {INPUT_FILE}...")
     try:
+        # Read CSV and ensure we only take the necessary columns
         df_prompts = pd.read_csv(INPUT_FILE)
+        if 'prompt_id' not in df_prompts.columns or 'final_prompt' not in df_prompts.columns:
+            print("Error: CSV must contain 'prompt_id' and 'final_prompt' columns.")
+            return
     except Exception as e:
         print(f"Error reading input file: {e}")
         return
@@ -29,11 +33,18 @@ def run_pipeline():
         prompt_id = row['prompt_id']
         prompt_text = row['final_prompt']
         
+        # Skip empty prompts
+        if pd.isna(prompt_text) or str(prompt_text).strip() == "":
+            continue
+
         for model in MODELS:
-            print(f"Processing Prompt {prompt_id} with {model}...")
+            print(f"--- Processing: {prompt_id} | Model: {model} ---")
             
             # 1. Call LLM
             generated_text = call_llm(model, prompt_text)
+            
+            if "ERROR:" in generated_text:
+                print(f"   [!] {generated_text}")
             
             # 2. Preprocess
             processed = preprocess_text(generated_text)
@@ -45,13 +56,13 @@ def run_pipeline():
             result_entry = {
                 "prompt_id": prompt_id,
                 "model": model,
-                "generated_text": generated_text,
+                "generated_text": generated_text.replace("\n", " "), # Flatten for CSV
                 **heuristics
             }
             results.append(result_entry)
             
-            # Rate limiting delay
-            time.sleep(1)
+            # Rate limiting delay (HF free tier requires some breathing room)
+            time.sleep(2)
 
     # Save to CSV
     df_results = pd.DataFrame(results)

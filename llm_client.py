@@ -19,12 +19,24 @@ def call_llm(model_id, prompt):
     }
     
     try:
-        response = requests.post(api_url, headers=headers, json=payload)
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        
+        if response.status_code == 410:
+            return f"ERROR: Model {model_id} is no longer available (410 Gone)."
+        if response.status_code == 401:
+            return "ERROR: Invalid HF_API_KEY. Please check your .env file."
+        if response.status_code == 429:
+            return "ERROR: Rate limit exceeded. Try increasing the sleep time."
+            
         response.raise_for_status()
         result = response.json()
+        
         if isinstance(result, list) and len(result) > 0:
             return result[0].get("generated_text", "")
+        elif isinstance(result, dict) and "generated_text" in result:
+            return result["generated_text"]
         return ""
+    except requests.exceptions.Timeout:
+        return "ERROR: Request timed out."
     except Exception as e:
-        print(f"Error calling {model_id}: {e}")
         return f"ERROR: {str(e)}"
